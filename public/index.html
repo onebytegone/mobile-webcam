@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+   <meta charset="utf-8">
+   <meta name="viewport" content="width=device-width,initial-scale=1.0">
+   <link rel="icon" type="image/png" href="favicon-32.png" />
+   <link rel="apple-touch-icon" sizes="120x120" href="icon-120.png">
+   <link rel="apple-touch-icon" sizes="180x180" href="icon-180.png">
+   <title>Mobile Webcam</title>
+   <style>
+      * {
+         box-sizing: border-box;
+      }
+      html,
+      body {
+         max-width: 500px;
+         margin: 0 auto;
+         padding: 0;
+         width: 100vw;
+         font-family: sans-serif;
+         background-color: #efefef;
+      }
+
+      body {
+         padding: 1.5em 2em;
+      }
+
+      button {
+         color: inherit;
+         font-family: inherit;
+         font-size: 100%;
+         line-height: 1.15;
+         margin: 0;
+         overflow: visible;
+         text-transform: none;
+      }
+
+      .video-wrapper {
+         max-height: 50vh;
+         padding-top: 56.25%;
+         height: 0px;
+         position: relative;
+      }
+      video {
+         width: 100%;
+         height: 100%;
+         position: absolute;
+         top: 0;
+         left: 0;
+         background-color: #000000;
+         border-radius: 4px;
+      }
+
+      .control-bar {
+         display: flex;
+         margin-bottom: 1em;
+      }
+      .control-bar button {
+         display: block;
+         flex: 1;
+         padding: 1em;
+         -webkit-appearance: none;
+         border-radius: 4px;
+         -webkit-border-radius: 4px;
+      }
+   </style>
+</head>
+
+<body>
+
+   <div class="control-bar">
+      <button class="switchCamera">Switch Camera</button>
+   </div>
+   <div class="video-wrapper">
+      <video autoplay poster="poster.jpg"></video>
+   </div>
+   <p>Tap video to start.</p>
+
+   <script>
+      const videoEl = document.querySelector('video'),
+            switchCameraBtn = document.querySelector('.switchCamera');
+
+      let currentFacingMode = 'environment';
+
+      videoEl.setAttribute('autoplay', '');
+      videoEl.setAttribute('muted', '');
+      videoEl.setAttribute('playsinline', '');
+
+      function handleError(error) {
+         alert('Error: ' + error);
+      }
+
+      function setVideoElementSrc(stream) {
+         videoEl.srcObject = stream;
+      }
+
+      function changeFacingMode(facingMode) {
+         const constraints = {
+            video: { facingMode: facingMode },
+         };
+
+         navigator.mediaDevices.getUserMedia(constraints)
+            .then(setVideoElementSrc)
+            .catch(handleError);
+      };
+
+      function makeVideoFullscreen() {
+         if (videoEl.webkitEnterFullScreen) {
+            videoEl.webkitEnterFullScreen();
+         } else if (videoEl.requestFullscreen) {
+            videoEl.requestFullscreen();
+         } else if (videoEl.webkitRequestFullscreen) {
+            video.webkitRequestFullscreen();
+         } else if (videoEl.msRequestFullscreen) {
+            videoEl.msRequestFullscreen();
+         }
+      }
+
+      function handleVideoElementInteraction(evt) {
+         evt.preventDefault();
+         if (!videoEl.srcObject) {
+            changeFacingMode(currentFacingMode);
+         } else {
+            if (videoEl.paused) {
+               videoEl.play();
+            }
+            makeVideoFullscreen();
+         }
+      }
+
+      videoEl.addEventListener('click', handleVideoElementInteraction);
+      videoEl.addEventListener('touchstart', handleVideoElementInteraction);
+
+      switchCameraBtn.addEventListener('click', function() {
+         currentFacingMode = (currentFacingMode === 'user' ? 'environment' : 'user');
+         changeFacingMode(currentFacingMode);
+      });
+   </script>
+</body>
+
+</html>

@@ -1,0 +1,32 @@
+name: Build and Deploy
+
+on: [ push ]
+
+jobs:
+   build:
+      runs-on: ubuntu-latest
+      steps:
+         -
+            uses: actions/checkout@v2
+            with:
+               fetch-depth: 0
+         -
+            uses: actions/upload-artifact@v2
+            with:
+               name:  client-dist
+               path: public
+   deploy:
+      if: github.ref == 'refs/heads/master'
+      needs: [ build ]
+      runs-on: ubuntu-latest
+      steps:
+         -
+            uses: actions/download-artifact@v2
+            with:
+               name: client-dist
+               path: dist
+         -
+            uses: peaceiris/actions-gh-pages@v3
+            with:
+               github_token: ${{ secrets.GITHUB_TOKEN }}
+               publish_dir: dist
